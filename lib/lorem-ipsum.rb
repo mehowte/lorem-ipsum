@@ -4,9 +4,10 @@ module LoremIpsum
 
 class Generator
 
-  def initialize(data_files = [])
+  def initialize(data_files = [], max_ngraph = 3)
     @letter_count = {}
     @word_lengths = {}
+    @max_ngraph = max_ngraph
 
     data_files.each { |file| analyze(file) }
   end
@@ -17,16 +18,22 @@ class Generator
         # todo - not handling punctuation
         line = line.strip.downcase.gsub(/[^a-z ]/, '')
 
-        word_length = 0
+        word = ""
         line.chars do |c|
           if c == ' '
-            @word_lengths[word_length] ||= 0
-            @word_lengths[word_length] += 1
-            word_length = 0
+            @word_lengths[word.length] ||= 0
+            @word_lengths[word.length] += 1
+            word = ""
           else
-            @letter_count[c] ||= 0
-            @letter_count[c] += 1
-            word_length += 1
+            word << c
+            n = [@max_ngraph, word.length].min
+            ngraph = word[-n..-1]
+
+            ngraph.chars.to_a.inject(@letter_count) do |hash, char|
+              hash[char] ||= { :count => 0 }
+              hash[char][:count] += 1
+              hash = hash[char]
+            end
           end
         end
       end
@@ -37,10 +44,11 @@ class Generator
     str = ""
     if options[:words]
       1.upto(options[:words]) do
+        word = ""
         1.upto(next_word_length) do |i|
-          str << next_char
+          word << next_char(word)
         end
-        str << " "
+        str << "#{word} "
       end
     end
 
@@ -60,12 +68,12 @@ class Generator
     length
   end
 
-  def next_char
-    @num_letters ||= @letter_count.values.inject(:+)
+  def next_char(prev)
+    @num_letters ||= @letter_count.values.inject(0) { |s,c| s += c[:count] }
     index = rand(@num_letters + 1)
 
     "abcdefghijklmnopqrstuvqxyz".chars do |c|
-      index -= @letter_count[c] || 0
+      index -= @letter_count[c] && @letter_count[c][:count] || 0
       return c if index <= 0
     end
   end
