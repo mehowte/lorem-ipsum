@@ -4,7 +4,7 @@ module LoremIpsum
 
 class Generator
 
-  def initialize(data_files = [], max_ngraph = 3)
+  def initialize(data_files = [], max_ngraph = 5)
     @letter_count = {}
     @word_lengths = {}
     @max_ngraph = max_ngraph
@@ -69,14 +69,15 @@ class Generator
   end
 
   def next_char(prev)
-    n = [@max_ngraph, prev.length].min
+    n = [@max_ngraph-1, prev.length].min
     prev_ngraph = prev[-n..-1]
 
     n_count = prev_ngraph.chars.to_a.inject(@letter_count) do |hash, char|
-      break hash if !hash[char] # If we don't have statistics for this n-graph,
-                                # just use the stats for the (n-1)-graph
+      # If we don't have statistics for this n-graph, just use the stats
+      # for the (n-1)-graph
+      break hash.keys.count > 3 ? hash : @letter_count if !hash[char]
       hash = hash[char]
-    end
+    end.reject { |k, v| k == :count }
 
     num_letters ||= n_count.values.inject(0) { |s,c| s += c[:count] }
     index = rand(num_letters + 1)
