@@ -69,11 +69,20 @@ class Generator
   end
 
   def next_char(prev)
-    @num_letters ||= @letter_count.values.inject(0) { |s,c| s += c[:count] }
-    index = rand(@num_letters + 1)
+    n = [@max_ngraph, prev.length].min
+    prev_ngraph = prev[-n..-1]
+
+    n_count = prev_ngraph.chars.to_a.inject(@letter_count) do |hash, char|
+      break hash if !hash[char] # If we don't have statistics for this n-graph,
+                                # just use the stats for the (n-1)-graph
+      hash = hash[char]
+    end
+
+    num_letters ||= n_count.values.inject(0) { |s,c| s += c[:count] }
+    index = rand(num_letters + 1)
 
     "abcdefghijklmnopqrstuvqxyz".chars do |c|
-      index -= @letter_count[c] && @letter_count[c][:count] || 0
+      index -= n_count[c] && n_count[c][:count] || 0
       return c if index <= 0
     end
   end
