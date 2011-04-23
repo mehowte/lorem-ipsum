@@ -29,7 +29,7 @@ class Generator
             n = [@max_ngraph, word.length].min
             ngraph = word[-n..-1]
 
-            ngraph.chars.to_a.inject(@letter_count) do |hash, char|
+            ngraph.chars.inject(@letter_count) do |hash, char|
               hash[char] ||= { :count => 0 }
               hash[char][:count] += 1
               hash = hash[char]
@@ -72,12 +72,19 @@ class Generator
     n = [@max_ngraph-1, prev.length].min
     prev_ngraph = prev[-n..-1]
 
-    n_count = prev_ngraph.chars.to_a.inject(@letter_count) do |hash, char|
-      # If we don't have statistics for this n-graph, just use the stats
-      # for the (n-1)-graph
-      break hash.keys.count > 3 ? hash : @letter_count if !hash[char]
-      hash = hash[char]
-    end.reject { |k, v| k == :count }
+    # If we don't have statistics for this n-graph, just use the stats
+    # for the (n-1)-graph
+    n_count = nil
+    until n_count
+      n_count = prev_ngraph.chars.inject(@letter_count) do |hash, char|
+        break if ! hash[char]
+        hash = hash[char]
+      end
+      prev_ngraph = prev_ngraph[1..-1]
+
+      n_count = @letter_count if ! prev_ngraph
+    end
+    n_count = n_count.reject { |k,v| k == :count }
 
     num_letters ||= n_count.values.inject(0) { |s,c| s += c[:count] }
     index = rand(num_letters + 1)
