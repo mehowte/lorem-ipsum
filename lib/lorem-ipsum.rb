@@ -3,7 +3,7 @@ module LoremIpsum
 class Generator
 
   def initialize(data_files = [], max_ngraph = 3)
-    @letter_count = {}
+    @letter_count = { :count => 0 }
     @max_ngraph = max_ngraph
 
     data_files.each { |file| analyze(file) }
@@ -13,9 +13,9 @@ class Generator
     File.open(filename) do |file|
       while (line = file.gets)
         # todo - not handling punctuation
-        line = line.strip.downcase.gsub(/[^a-z ]/, '')
+        line = line.strip.downcase.gsub(/[^a-z ]/, '') << ' '
 
-        word = ""
+        word = "^"
         line.chars do |c|
           word << c
           n = [@max_ngraph, word.length].min
@@ -28,7 +28,7 @@ class Generator
           end
 
           if c == ' '
-            word = ""
+            word = "^"
           end
         end
       end
@@ -45,9 +45,9 @@ class Generator
   end
 
   def next_word
-    word = ""
+    word = "^"
     word << next_char(word) while word[-1..-1] != ' '
-    word
+    word[1..-1]
   end
 
   def next_char(prev)
