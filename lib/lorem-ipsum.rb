@@ -1,5 +1,3 @@
-#!/usr/bin/env ruby
-
 module LoremIpsum
 
 class Generator
@@ -86,10 +84,5 @@ class Generator
 
 end
 
-end
-
-if __FILE__ == $0
-  gen = LoremIpsum::Generator.new(ARGV, 3)
-  p gen.generate
 end
 

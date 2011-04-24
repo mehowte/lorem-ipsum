@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), *%w[.. lib])
+
+require 'lorem-ipsum'
+
+# TODO - Add "--max-ngraph" option
+
+gen = LoremIpsum::Generator.new(ARGV)
+puts gen.generate.strip
+
