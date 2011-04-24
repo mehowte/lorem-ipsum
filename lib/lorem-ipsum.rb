@@ -2,9 +2,9 @@ module LoremIpsum
 
 class Generator
 
-  def initialize(data_files = [], max_ngraph = 3)
+  def initialize(data_files = [], opts = { :max_ngraph => 3 })
     @letter_count = { :count => 0 }
-    @max_ngraph = max_ngraph
+    @max_ngraph = opts[:max_ngraph]
 
     data_files.each { |file| analyze(file) }
   end
