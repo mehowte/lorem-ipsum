@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__), *%w[.. lib])
+$DATA_DIR = File.join(File.dirname(__FILE__), *%w[.. data])
 
 require 'lorem-ipsum'
 require 'optparse'
@@ -41,6 +42,17 @@ rescue
   opts.abort
 end
 
-gen = LoremIpsum::Generator.new(ARGV, init_options)
+# There has to be a more Ruby way to do this...
+if ARGV.empty?
+  files = Dir.entries($DATA_DIR).reject do |f|
+    f =~ /^\.\.?$/
+  end.collect do |f|
+    "#{$DATA_DIR}/#{f}"
+  end
+else
+  files = ARGV
+end
+
+gen = LoremIpsum::Generator.new(files, init_options)
 puts gen.generate(gen_options).strip
 
