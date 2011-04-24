@@ -38,7 +38,24 @@ class Generator
   def generate(options = { :words => 100 })
     str = ""
     if options[:words]
-      1.upto(options[:words]) { str << next_word }
+      to_next_sentence = rand(10) + 5
+      start_of_sentence = true
+      1.upto(options[:words]) do |i|
+        word = next_word
+        if start_of_sentence
+          word.capitalize!
+          start_of_sentence = false
+        end
+
+        to_next_sentence -= 1
+        if to_next_sentence == 0 || i == options[:words]
+          word.gsub!(/ /,'. ')
+          to_next_sentence = rand(10) + 5
+          start_of_sentence = true
+        end
+        
+        str << word
+      end
     end
 
     str
