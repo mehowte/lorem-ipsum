@@ -4,9 +4,8 @@ module LoremIpsum
 
 class Generator
 
-  def initialize(data_files = [], max_ngraph = 5)
+  def initialize(data_files = [], max_ngraph = 3)
     @letter_count = {}
-    @word_lengths = {}
     @max_ngraph = max_ngraph
 
     data_files.each { |file| analyze(file) }
@@ -20,20 +19,18 @@ class Generator
 
         word = ""
         line.chars do |c|
-          if c == ' '
-            @word_lengths[word.length] ||= 0
-            @word_lengths[word.length] += 1
-            word = ""
-          else
-            word << c
-            n = [@max_ngraph, word.length].min
-            ngraph = word[-n..-1]
+          word << c
+          n = [@max_ngraph, word.length].min
+          ngraph = word[-n..-1]
 
-            ngraph.chars.inject(@letter_count) do |hash, char|
-              hash[char] ||= { :count => 0 }
-              hash[char][:count] += 1
-              hash = hash[char]
-            end
+          ngraph.chars.inject(@letter_count) do |hash, char|
+            hash[char] ||= { :count => 0 }
+            hash[char][:count] += 1
+            hash = hash[char]
+          end
+
+          if c == ' '
+            word = ""
           end
         end
       end
@@ -43,32 +40,24 @@ class Generator
   def generate(options = { :words => 100 })
     str = ""
     if options[:words]
-      1.upto(options[:words]) do
-        word = ""
-        1.upto(next_word_length) do |i|
-          word << next_char(word)
-        end
-        str << "#{word} "
-      end
+      1.upto(options[:words]) { str << next_word }
     end
 
     str
   end
 
-  def next_word_length
-    @num_words ||= @word_lengths.values.inject(:+)
-    index = rand(@num_words + 1)  # rand is fine. We don't need to generate
-                                  # cryptographically secure lorem ipsum texts
-                                  # for the military, here.
-    length = 1
-    while index > 0
-      index -= @word_lengths[length] || 0
-      length += 1
-    end
-    length
+  def next_word
+    word = ""
+    word << next_char(word) while word[-1..-1] != ' '
+    word
   end
 
   def next_char(prev)
+    # Need to make sure our words don't get too long. Not everyone is Charles
+    # Dickens, even in fake-Latin land. These parameters seem to look nice,
+    # but salt to taste.
+    return ' ' if prev.length > 4 && rand(9 + prev.length) < prev.length
+
     n = [@max_ngraph-1, prev.length].min
     prev_ngraph = prev[-n..-1]
 
@@ -84,12 +73,12 @@ class Generator
 
       n_count = @letter_count if ! prev_ngraph
     end
-    n_count = n_count.reject { |k,v| k == :count }
+    n_count = n_count.reject { |k,v| k == :count || prev.empty? && k == ' ' }
 
     num_letters ||= n_count.values.inject(0) { |s,c| s += c[:count] }
     index = rand(num_letters + 1)
 
-    "abcdefghijklmnopqrstuvqxyz".chars do |c|
+    "abcdefghijklmnopqrstuvqxyz ".chars do |c|
       index -= n_count[c] && n_count[c][:count] || 0
       return c if index <= 0
     end
@@ -100,7 +89,7 @@ end
 end
 
 if __FILE__ == $0
-  gen = LoremIpsum::Generator.new(ARGV)
+  gen = LoremIpsum::Generator.new(ARGV, 3)
   p gen.generate
 end
 
