@@ -37,18 +37,24 @@ class Generator
 
   def generate(options)
     options[:paras] ||= 1
+    options[:variance] ||= 0
     options[:words] ||= 100
 
     str = ""
     1.upto(options[:paras]) do |i|
-      str << next_paragraph(options[:words]) << "\n"
+      str << next_paragraph(options[:words], options[:variance]) << "\n"
     end
 
     str
   end
 
-  def next_paragraph(word_count)
+  def next_paragraph(word_count, variance = 0)
     str = ""
+
+    if variance != 0
+      range = (2 * variance * word_count / 100.0).to_i
+      word_count = word_count + rand(range) - range / 2
+    end
 
     while word_count > 0
       sentence_count = [rand(10) + 5, word_count].min
