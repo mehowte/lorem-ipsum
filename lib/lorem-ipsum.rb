@@ -90,7 +90,7 @@ class Generator
     return ' ' if prev.length > 4 && rand(9 + prev.length) < prev.length
 
     n = [@max_ngraph-1, prev.length].min
-    prev_ngraph = prev[-n..-1]
+    prev_ngraph = n == 0 ? "" : prev[-n..-1]
 
     # If we don't have statistics for this n-graph, just use the stats
     # for the (n-1)-graph
