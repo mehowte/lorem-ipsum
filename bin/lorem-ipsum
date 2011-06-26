@@ -42,16 +42,7 @@ rescue
   opts.abort
 end
 
-# There has to be a more Ruby way to do this...
-if ARGV.empty?
-  files = Dir.entries($DATA_DIR).reject do |f|
-    f =~ /^\.\.?$/
-  end.collect do |f|
-    "#{$DATA_DIR}/#{f}"
-  end
-else
-  files = ARGV
-end
+files = ARGV.empty? ? Dir.glob($DATA_DIR + "/*") : ARGV
 
 gen = LoremIpsum::Generator.new(files, init_options)
 puts gen.generate(gen_options).strip
