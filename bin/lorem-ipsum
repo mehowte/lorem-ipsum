@@ -7,7 +7,7 @@ require 'lorem-ipsum'
 require 'optparse'
 
 init_options = { :max_ngraph => 3 }
-gen_options = { :words => 100 }
+gen_options = { :words => 100 , :paras => 1 }
 
 opts = OptionParser.new do |opts|
   opts.banner = "Usage: #{$0} [options] data-files"
@@ -24,14 +24,19 @@ opts = OptionParser.new do |opts|
     int_val
   end
 
-  opts.on("--max-ngraph MAX",
-      "Max length of n-graphs. Default is 3") do |v|
+  opts.on("--max-ngraph MAX=3",
+      "Max length of n-graphs.") do |v|
     init_options[:max_ngraph] = check_int_arg(v, :min => 1)
   end
 
-  opts.on("-w", "--words WORDS",
-      "Number of words to generate. Default is 100") do |v|
+  opts.on("-w", "--words WORDS=100",
+      "Number of words to generate.") do |v|
     gen_options[:words] = check_int_arg(v, :min => 1)
+  end
+
+  opts.on("-p", "--paragraphs PARAS=1",
+      "Number of paragraphs to generate.") do |v|
+    gen_options[:paras] = check_int_arg(v, :min=>1)
   end
 
 end
