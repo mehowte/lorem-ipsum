@@ -25,7 +25,7 @@ opts = OptionParser.new do |opts|
   end
 
   opts.on("--max-ngraph MAX",
-      "Maximum length of n-graphs to track. Default is 3") do |v|
+      "Max length of n-graphs. Default is 3") do |v|
     init_options[:max_ngraph] = check_int_arg(v, :min => 1)
   end
 
