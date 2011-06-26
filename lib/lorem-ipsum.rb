@@ -35,27 +35,37 @@ class Generator
     end
   end
 
-  def generate(options = { :words => 100 })
-    str = ""
-    if options[:words]
-      to_next_sentence = rand(10) + 5
-      start_of_sentence = true
-      1.upto(options[:words]) do |i|
-        word = next_word
-        if start_of_sentence
-          word.capitalize!
-          start_of_sentence = false
-        end
+  def generate(options)
+    options[:paras] ||= 1
+    options[:words] ||= 100
 
-        to_next_sentence -= 1
-        if to_next_sentence == 0 || i == options[:words]
-          word.gsub!(/ /,'. ')
-          to_next_sentence = rand(10) + 5
-          start_of_sentence = true
-        end
-        
-        str << word
-      end
+    str = ""
+    1.upto(options[:paras]) do |i|
+      str << next_paragraph(options[:words]) << "\n"
+    end
+
+    str
+  end
+
+  def next_paragraph(word_count)
+    str = ""
+
+    while word_count > 0
+      sentence_count = [rand(10) + 5, word_count].min
+      str << next_sentence(sentence_count)
+      word_count -= sentence_count
+    end
+
+    str << "\n"
+  end
+
+  def next_sentence(word_count)
+    str = ""
+    1.upto(word_count) do |i|
+      word = next_word
+      word.capitalize! if i == 1
+      word.gsub!(/ /,'. ') if i == word_count
+      str << word
     end
 
     str
