@@ -3,7 +3,10 @@ require 'rake/gempackagetask'
 require 'rubygems'
 
 def version
-  `git describe --tags 2> /dev/null`.split('-')[0] || "0.0.1"
+  version = `git describe --tags 2> /dev/null`.gsub(/-/,'.')
+  version = '0.0.1' if version.empty?
+
+  version
 end
 
 spec = Gem::Specification.new do |s|
